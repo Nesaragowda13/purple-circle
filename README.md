@@ -6,6 +6,14 @@ An interactive, high-aesthetic digital menu poster & real-time kitchen administr
 
 ---
 
+## 🌐 Live Web Links
+
+- 📜 **Customer Menu Card**: [https://nesaragowda13.github.io/purple-circle/](https://nesaragowda13.github.io/purple-circle/)
+- 👨‍🍳 **Kitchen Admin Dashboard**: [https://nesaragowda13.github.io/purple-circle/admin.html](https://nesaragowda13.github.io/purple-circle/admin.html)
+
+---
+
+
 ## 🌟 Key Features
 
 ### 📜 1. Vintage Poster Menu Card (`index.html`)
