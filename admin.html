@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin & Kitchen Dashboard | Namma Purple's Indo-Italian Adda</title>
+    <meta name="description" content="Real-time Admin and Kitchen Dashboard for managing live potluck orders, dish availability, and sales analytics.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800&family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Montserrat:wght@400;500;600;700;800&family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Admin Stylesheet -->
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body class="royal-admin-theme">
+
+    <!-- Admin Top Navigation Bar -->
+    <header class="admin-header">
+        <div class="admin-header-container">
+            <div class="admin-brand">
+                <a href="index.html" class="back-to-menu-btn" title="Back to Customer Menu">
+                    <i class="fa-solid fa-arrow-left"></i> Customer Menu
+                </a>
+                <div class="admin-title-group">
+                    <span class="admin-badge"><i class="fa-solid fa-shield-halved"></i> ADMIN PORTAL</span>
+                    <h1 class="admin-main-title">Indo-Italian Adda Kitchen Dashboard</h1>
+                </div>
+            </div>
+
+            <div class="admin-header-actions">
+                <div class="live-status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">Live Order Sync Active</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" id="toggleAudioChimeBtn">
+                    <i class="fa-solid fa-bell"></i> Audio Alert: On
+                </button>
+                <button class="btn btn-danger btn-sm" id="clearAllOrdersBtn" title="Clear all orders log">
+                    <i class="fa-solid fa-trash-can"></i> Clear Orders Log
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Main Workspace -->
+    <main class="admin-layout">
+
+        <!-- Analytics Metric Cards -->
+        <section class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon icon-purple"><i class="fa-solid fa-bell-concierge"></i></div>
+                <div class="metric-data">
+                    <span class="metric-label">Total Orders Placed</span>
+                    <h3 class="metric-value" id="metricTotalOrders">0</h3>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-gold"><i class="fa-solid fa-clock"></i></div>
+                <div class="metric-data">
+                    <span class="metric-label">Active / In-Kitchen</span>
+                    <h3 class="metric-value" id="metricActiveOrders">0</h3>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div class="metric-data">
+                    <span class="metric-label">Total Revenue</span>
+                    <h3 class="metric-value" id="metricTotalRevenue">₹0</h3>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon icon-terracotta"><i class="fa-solid fa-fire-burner"></i></div>
+                <div class="metric-data">
+                    <span class="metric-label">Most Popular Dish</span>
+                    <h3 class="metric-value metric-sm" id="metricPopularDish">None Yet</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Admin Workspace Tabs -->
+        <section class="admin-tabs-section">
+            <div class="admin-nav-tabs">
+                <button class="admin-tab-btn active" data-tab="live-orders">
+                    <i class="fa-solid fa-list-check"></i> Live Kitchen Orders (<span id="count-live-orders">0</span>)
+                </button>
+                <button class="admin-tab-btn" data-tab="dish-manager">
+                    <i class="fa-solid fa-utensils"></i> Menu Stock & Item Manager
+                </button>
+                <button class="admin-tab-btn" data-tab="analytics-reports">
+                    <i class="fa-solid fa-chart-pie"></i> Potluck Event Report
+                </button>
+            </div>
+        </section>
+
+        <!-- Tab 1: Live Kitchen Orders Board -->
+        <section class="tab-content active" id="tab-live-orders">
+            <div class="orders-controls-bar">
+                <div class="order-filter-pills">
+                    <span class="filter-title"><i class="fa-solid fa-filter"></i> Order Status:</span>
+                    <button class="order-filter-pill active" data-status="all">All</button>
+                    <button class="order-filter-pill" data-status="NEW">New (<span id="status-count-new">0</span>)</button>
+                    <button class="order-filter-pill" data-status="PREPARING">Preparing (<span id="status-count-preparing">0</span>)</button>
+                    <button class="order-filter-pill" data-status="SERVED">Served (<span id="status-count-served">0</span>)</button>
+                </div>
+                <div class="orders-search">
+                    <input type="text" id="orderSearchInput" placeholder="Search Order ID or Guest Name...">
+                </div>
+            </div>
+
+            <div class="orders-grid" id="ordersGrid">
+                <!-- Injected via admin.js -->
+            </div>
+
+            <div class="no-orders-state" id="noOrdersState" style="display: none;">
+                <i class="fa-solid fa-utensils"></i>
+                <h3>No Orders Received Yet</h3>
+                <p>When guests place an order on the customer menu, it will automatically appear here with a chime sound!</p>
+            </div>
+        </section>
+
+        <!-- Tab 2: Menu Stock & Price Manager -->
+        <section class="tab-content" id="tab-dish-manager" style="display: none;">
+            <div class="manager-card">
+                <div class="manager-header">
+                    <h3><i class="fa-solid fa-sliders"></i> Menu Stock & Pricing Control</h3>
+                    <p>Toggle dish stock availability or adjust potluck pricing in real time.</p>
+                </div>
+                <div class="manager-table-wrapper">
+                    <table class="manager-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Italian Name</th>
+                                <th>Indian Alias</th>
+                                <th>Price (₹)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stockTableBody">
+                            <!-- Injected via admin.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: Potluck Event Report -->
+        <section class="tab-content" id="tab-analytics-reports" style="display: none;">
+            <div class="report-card">
+                <div class="report-header">
+                    <h3><i class="fa-solid fa-file-invoice-dollar"></i> Potluck Sales & Items Summary Report</h3>
+                    <button class="btn btn-secondary btn-sm" id="exportReportBtn"><i class="fa-solid fa-download"></i> Copy Full Report</button>
+                </div>
+                <div class="report-body" id="reportSummaryContent">
+                    <!-- Injected via admin.js -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Admin Footer -->
+    <footer class="admin-footer">
+        <p>NAMMA PURPLE'S INDO-ITALIAN ADDA • ADMIN & KITCHEN COORDINATION PORTAL</p>
+    </footer>
+
+    <!-- App Scripts -->
+    <script src="app.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
