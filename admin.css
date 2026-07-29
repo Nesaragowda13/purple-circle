@@ -618,3 +618,50 @@ body.royal-admin-theme {
     color: var(--admin-text-muted);
 }
 
+/* Live New Order Alert Banner */
+.new-order-alert-banner {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    padding: 12px 20px;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    animation: bounceAlert 0.4s ease;
+    border-bottom: 2px solid #047857;
+}
+
+@keyframes bounceAlert {
+    0% { transform: translateY(-100%); }
+    70% { transform: translateY(8px); }
+    100% { transform: translateY(0); }
+}
+
+.alert-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.alert-pulse-icon {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.alert-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+

@@ -1226,7 +1226,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Generate On-Spot Order Token & Timestamp
         const orderNum = Math.floor(100 + Math.random() * 900);
-        const orderId = `#ADDA-${orderNum}`;
+        const orderId = `ADDA-${orderNum}`;
         const timestamp = new Date().toISOString();
 
         let subtotal = 0;

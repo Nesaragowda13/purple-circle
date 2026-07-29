@@ -48,24 +48,56 @@ document.addEventListener('DOMContentLoaded', () => {
         pollCloudOrders();
     }
 
+    let globalAudioCtx = null;
+
+    function unlockAudioContext() {
+        try {
+            if (!globalAudioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                globalAudioCtx = new AudioContext();
+            }
+            if (globalAudioCtx && globalAudioCtx.state === 'suspended') {
+                globalAudioCtx.resume();
+            }
+        } catch (e) {}
+    }
+    document.addEventListener('click', unlockAudioContext);
+    document.addEventListener('touchstart', unlockAudioContext);
+
+    function showNewOrderVisualAlert(order) {
+        const banner = document.getElementById('newOrderAlertBanner');
+        const alertText = document.getElementById('newOrderAlertText');
+        if (banner && alertText) {
+            const guest = order.guestName || 'Guest';
+            alertText.textContent = `Order #${order.orderId} • Guest: ${guest} • Total: ₹${order.totalPrice || 0}`;
+            banner.style.display = 'block';
+            document.title = `🔔 (NEW ORDER!) Admin Dashboard - Indo-Italian Adda`;
+        }
+    }
+
     function pollCloudOrders() {
         fetch(CLOUD_API_URL)
             .then(res => res.json())
             .then(remoteOrders => {
                 if (Array.isArray(remoteOrders)) {
                     let hasNewOrders = false;
+                    let latestNewOrder = null;
 
                     remoteOrders.forEach(remoteOrder => {
                         const localIndex = orders.findIndex(o => o.orderId === remoteOrder.orderId);
                         if (localIndex === -1) {
                             orders.unshift(remoteOrder);
                             hasNewOrders = true;
+                            latestNewOrder = remoteOrder;
                         }
                     });
 
                     if (hasNewOrders) {
                         localStorage.setItem('adda_orders', JSON.stringify(orders));
                         renderAll();
+                        if (latestNewOrder) {
+                            showNewOrderVisualAlert(latestNewOrder);
+                        }
                         if (isAudioChimeEnabled) {
                             playKitchenChimeSound();
                         }
@@ -393,6 +425,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 syncOrdersToCloud();
             }
         });
+
+        // Copy Report
+        const closeOrderAlertBtn = document.getElementById('closeOrderAlertBtn');
+        const newOrderAlertBanner = document.getElementById('newOrderAlertBanner');
+        if (closeOrderAlertBtn && newOrderAlertBanner) {
+            closeOrderAlertBtn.addEventListener('click', () => {
+                newOrderAlertBanner.style.display = 'none';
+                document.title = "Namma Purple's Indo-Italian Adda - Admin & Kitchen Dashboard";
+            });
+        }
 
         // Copy Report
         if (exportReportBtn) {
