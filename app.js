@@ -955,9 +955,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Cart Drawer
-        openCartBtn.addEventListener('click', () => {
-            cartDrawer.style.display = 'flex';
-        });
+        if (openCartBtn) {
+            openCartBtn.addEventListener('click', () => {
+                cartDrawer.style.display = 'flex';
+            });
+        }
+
+        const stickyMobileCartBar = document.getElementById('stickyMobileCartBar');
+        if (stickyMobileCartBar) {
+            stickyMobileCartBar.addEventListener('click', () => {
+                cartDrawer.style.display = 'flex';
+            });
+        }
 
         closeCartBtn.addEventListener('click', () => {
             cartDrawer.style.display = 'none';
@@ -1089,8 +1098,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartUI();
         
         // Brief button feedback
-        openCartBtn.classList.add('pulse');
-        setTimeout(() => openCartBtn.classList.remove('pulse'), 300);
+        if (openCartBtn) {
+            openCartBtn.classList.add('pulse');
+            setTimeout(() => openCartBtn.classList.remove('pulse'), 300);
+        }
+
+        const stickyMobileCartBar = document.getElementById('stickyMobileCartBar');
+        if (stickyMobileCartBar) {
+            stickyMobileCartBar.style.display = 'flex';
+        }
     }
 
     function addComboToCart(comboKey) {
@@ -1103,7 +1119,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateCartUI() {
         const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-        cartCountBadge.textContent = totalItems;
+        if (cartCountBadge) cartCountBadge.textContent = totalItems;
+
+        const stickyMobileCartBar = document.getElementById('stickyMobileCartBar');
+        const mobileCartItemCount = document.getElementById('mobileCartItemCount');
+        const mobileCartTotal = document.getElementById('mobileCartTotal');
 
         if (cart.length === 0) {
             cartItemsList.innerHTML = '';
@@ -1114,6 +1134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             billDiscount.textContent = '-₹0';
             discountRow.style.display = 'none';
             billTotal.textContent = '₹0';
+            if (stickyMobileCartBar) stickyMobileCartBar.style.display = 'none';
             return;
         }
 
@@ -1156,6 +1177,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const total = subtotal - discount;
         billSubtotal.textContent = `₹${subtotal}`;
         billTotal.textContent = `₹${total}`;
+
+        if (stickyMobileCartBar) {
+            stickyMobileCartBar.style.display = 'flex';
+            if (mobileCartItemCount) mobileCartItemCount.textContent = totalItems;
+            if (mobileCartTotal) mobileCartTotal.textContent = `Total: ₹${total}`;
+        }
     }
 
     window.changeQty = function(itemId, delta) {
