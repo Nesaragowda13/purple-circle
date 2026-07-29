@@ -17,8 +17,9 @@
     <!-- Admin Stylesheet -->
     <link rel="stylesheet" href="admin.css">
 
-    <!-- QRCode JS CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- QRCode JS (Local + CDN Fallback) -->
+    <script src="qrcode.min.js"></script>
+    <script>if (typeof QRCode === 'undefined') { document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>'); }</script>
 </head>
 <body class="royal-admin-theme">
 

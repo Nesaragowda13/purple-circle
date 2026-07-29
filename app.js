@@ -780,6 +780,8 @@ document.addEventListener('DOMContentLoaded', () => {
         renderMenuCards();
         updateCategoryCounts();
         setupEventListeners();
+        initCustomerQR();
+        checkURLParams();
     }
 
     // --- RENDER MENU CARDS ---
@@ -990,21 +992,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Theme Toggle
-        toggleThemeBtn.addEventListener('click', () => {
-            isDarkMode = !isDarkMode;
-            if (isDarkMode) {
-                document.body.classList.add('royal-purple-theme');
-                toggleThemeBtn.querySelector('.btn-text').textContent = 'Parchment Mode';
-            } else {
-                document.body.classList.remove('royal-purple-theme');
-                toggleThemeBtn.querySelector('.btn-text').textContent = 'Royal Purple Mode';
-            }
-        });
+        if (toggleThemeBtn) {
+            toggleThemeBtn.addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                if (isDarkMode) {
+                    document.body.classList.add('royal-purple-theme');
+                    toggleThemeBtn.querySelector('.btn-text').textContent = 'Parchment Mode';
+                } else {
+                    document.body.classList.remove('royal-purple-theme');
+                    toggleThemeBtn.querySelector('.btn-text').textContent = 'Royal Purple Mode';
+                }
+            });
+        }
 
         // Audio Bistro Ambient Toggle
-        toggleAudioBtn.addEventListener('click', () => {
-            toggleBistroAudio();
-        });
+        if (toggleAudioBtn) {
+            toggleAudioBtn.addEventListener('click', () => {
+                toggleBistroAudio();
+            });
+        }
 
         // Print / Poster View Toggle
         printViewBtn.addEventListener('click', () => {
@@ -1334,13 +1340,143 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function stopAudio() {
-        audioOscillators.forEach(osc => {
-            try { osc.stop(); } catch(e){}
+    // --- CUSTOMER QR CODE GENERATOR & MODAL ---
+    function initCustomerQR() {
+        const customerQRBtn = document.getElementById('customerQRBtn');
+        const customerQRModal = document.getElementById('customerQRModal');
+        const closeCustomerQRModal = document.getElementById('closeCustomerQRModal');
+        const customerQRContainer = document.getElementById('customerQRContainer');
+        const customerQRSubtext = document.getElementById('customerQRSubtext');
+        const copyCustomerQRLinkBtn = document.getElementById('copyCustomerQRLinkBtn');
+        const downloadCustomerQRBtn = document.getElementById('downloadCustomerQRBtn');
+
+        if (!customerQRBtn || !customerQRModal) return;
+
+        function renderQR() {
+            const currentUrl = window.location.href;
+            if (customerQRSubtext) {
+                try {
+                    const urlObj = new URL(currentUrl);
+                    const spotSrc = urlObj.searchParams.get('src');
+                    if (spotSrc) {
+                        customerQRSubtext.innerHTML = `<strong>${spotSrc.toUpperCase()}</strong> • On-Spot Mobile Menu`;
+                    } else {
+                        customerQRSubtext.textContent = `Namma Purple's Indo-Italian Adda Menu`;
+                    }
+                } catch(e) {
+                    customerQRSubtext.textContent = `Namma Purple's Indo-Italian Adda Menu`;
+                }
+            }
+
+            customerQRContainer.innerHTML = '';
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(customerQRContainer, {
+                    text: currentUrl,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#2d1228",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } else {
+                renderFallbackCanvasQR(customerQRContainer, currentUrl);
+            }
+        }
+
+        function renderFallbackCanvasQR(container, text) {
+            container.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.width = 200;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 200, 200);
+            ctx.fillStyle = '#2d1228';
+            ctx.fillRect(15, 15, 50, 50);
+            ctx.fillRect(135, 15, 50, 50);
+            ctx.fillRect(15, 135, 50, 50);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(25, 25, 30, 30);
+            ctx.fillRect(145, 25, 30, 30);
+            ctx.fillRect(25, 145, 30, 30);
+            ctx.fillStyle = '#2d1228';
+            ctx.fillRect(35, 35, 10, 10);
+            ctx.fillRect(155, 35, 10, 10);
+            ctx.fillRect(35, 155, 10, 10);
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SCAN MENU QR', 100, 105);
+            container.appendChild(canvas);
+        }
+
+        customerQRBtn.addEventListener('click', () => {
+            renderQR();
+            customerQRModal.style.display = 'flex';
         });
-        audioOscillators = [];
-        if (audioContext) {
-            try { audioContext.close(); } catch(e){}
+
+        if (closeCustomerQRModal) {
+            closeCustomerQRModal.addEventListener('click', () => {
+                customerQRModal.style.display = 'none';
+            });
+        }
+
+        if (customerQRModal) {
+            customerQRModal.addEventListener('click', (e) => {
+                if (e.target === customerQRModal) {
+                    customerQRModal.style.display = 'none';
+                }
+            });
+        }
+
+        if (copyCustomerQRLinkBtn) {
+            copyCustomerQRLinkBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    alert('Customer Menu URL copied to clipboard!');
+                });
+            });
+        }
+
+        if (downloadCustomerQRBtn) {
+            downloadCustomerQRBtn.addEventListener('click', () => {
+                const el = customerQRContainer.querySelector('img') || customerQRContainer.querySelector('canvas');
+                if (!el) return;
+                const dataUrl = el.tagName.toLowerCase() === 'img' ? el.src : el.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataUrl;
+                a.download = 'IndoItalianAdda_MenuQR.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            });
+        }
+    }
+
+    // --- URL PARAMETERS HANDLER ---
+    function checkURLParams() {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const isSpot = urlParams.get('spot') === '1';
+            const spotSrc = urlParams.get('src');
+            const promoCode = urlParams.get('promo');
+
+            const onspotHeaderBadge = document.getElementById('onspotHeaderBadge');
+            const onspotBadgeText = document.getElementById('onspotBadgeText');
+
+            if (isSpot || spotSrc) {
+                if (onspotHeaderBadge) {
+                    onspotHeaderBadge.style.display = 'inline-flex';
+                }
+                if (onspotBadgeText && spotSrc) {
+                    onspotBadgeText.textContent = `On-Spot: ${spotSrc}`;
+                }
+            }
+
+            if (promoCode && promoCodeInput && applyPromoBtn) {
+                promoCodeInput.value = promoCode;
+                applyPromoBtn.click();
+            }
+        } catch(e) {
+            console.error('Error processing URL parameters:', e);
         }
     }
 
