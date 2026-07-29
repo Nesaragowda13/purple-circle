@@ -73,6 +73,15 @@ document.addEventListener('DOMContentLoaded', () => {
             banner.style.display = 'block';
             document.title = `🔔 (NEW ORDER!) Admin Dashboard - Indo-Italian Adda`;
         }
+
+        // Auto-switch filter pill to "All" so new orders are instantly visible
+        const allPill = document.querySelector('.order-filter-pill[data-status="all"]');
+        if (allPill && currentStatusFilter !== 'all' && currentStatusFilter !== 'NEW') {
+            orderFilterPills.forEach(p => p.classList.remove('active'));
+            allPill.classList.add('active');
+            currentStatusFilter = 'all';
+            renderOrdersGrid();
+        }
     }
 
     function pollCloudOrders() {
@@ -144,6 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAll();
     }
 
+    function normalizeStatus(status) {
+        if (!status) return 'NEW';
+        return String(status).toUpperCase().trim();
+    }
+
     // --- RENDER EVERYTHING ---
     function renderAll() {
         renderMetrics();
@@ -157,7 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderMetrics() {
         metricTotalOrders.textContent = orders.length;
         
-        const activeCount = orders.filter(o => o.status === 'NEW' || o.status === 'PREPARING').length;
+        const activeCount = orders.filter(o => {
+            const st = normalizeStatus(o.status);
+            return st === 'NEW' || st === 'PREPARING';
+        }).length;
         metricActiveOrders.textContent = activeCount;
 
         const totalRev = orders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
@@ -168,8 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
         orders.forEach(o => {
             if (o.items) {
                 o.items.forEach(i => {
-                    const name = i.italianName || i.name;
-                    itemFreq[name] = (itemFreq[name] || 0) + i.qty;
+                    const name = i.italianName || i.name || 'Dish';
+                    itemFreq[name] = (itemFreq[name] || 0) + (i.qty || 1);
                 });
             }
         });
@@ -190,9 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
         ordersGrid.innerHTML = '';
 
         const filtered = orders.filter(order => {
-            const matchesStatus = (currentStatusFilter === 'all') || (order.status === currentStatusFilter);
+            const orderSt = normalizeStatus(order.status);
+            const filterSt = normalizeStatus(currentStatusFilter);
+
+            const matchesStatus = (currentStatusFilter === 'all') || (orderSt === filterSt);
             const matchesSearch = searchQuery === '' || 
-                order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                (order.orderId && order.orderId.toLowerCase().includes(searchQuery.toLowerCase())) ||
                 (order.guestName && order.guestName.toLowerCase().includes(searchQuery.toLowerCase()));
 
             return matchesStatus && matchesSearch;
@@ -206,35 +226,37 @@ document.addEventListener('DOMContentLoaded', () => {
         noOrdersState.style.display = 'none';
 
         // Sort newest first
-        filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        filtered.sort((a, b) => new Date(b.timestamp || Date.now()) - new Date(a.timestamp || Date.now()));
 
         filtered.forEach(order => {
+            const orderSt = normalizeStatus(order.status);
             const card = document.createElement('div');
-            card.className = `order-card status-${order.status}`;
+            card.className = `order-card status-${orderSt}`;
 
-            const itemsRows = order.items.map(item => `
+            const itemsRows = (order.items || []).map(item => `
                 <tr>
-                    <td class="item-name">${item.italianName} <small>(${item.indianAlias})</small></td>
-                    <td class="item-qty">x${item.qty}</td>
-                    <td class="item-price">₹${item.price * item.qty}</td>
+                    <td class="item-name">${item.italianName || item.name || 'Dish'} <small>(${item.indianAlias || ''})</small></td>
+                    <td class="item-qty">x${item.qty || 1}</td>
+                    <td class="item-price">₹${(item.price || 0) * (item.qty || 1)}</td>
                 </tr>
             `).join('');
 
-            const timeString = new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const timeString = order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now';
+            const displayOrderId = order.orderId ? (order.orderId.startsWith('#') ? order.orderId : `#${order.orderId}`) : '#ADDA';
 
             card.innerHTML = `
                 <div class="order-card-header">
                     <div>
-                        <div class="order-id">${order.orderId}</div>
+                        <div class="order-id">${displayOrderId}</div>
                         <div class="order-timestamp"><i class="fa-solid fa-clock"></i> ${timeString}</div>
                     </div>
-                    <span class="status-badge badge-${order.status}">${order.status}</span>
+                    <span class="status-badge badge-${orderSt}">${orderSt}</span>
                 </div>
 
                 <div class="order-guest-info" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                     <div><i class="fa-solid fa-user"></i> <strong>${order.guestName || 'Potluck Guest'}</strong></div>
                     <div style="background: rgba(197, 160, 89, 0.2); border: 1px solid var(--admin-border-gold); padding: 2px 8px; border-radius: 4px; font-weight: 700; color: var(--admin-border-gold); font-size: 0.82rem;">
-                        <i class="fa-solid fa-ticket"></i> Token: ${order.orderId}
+                        <i class="fa-solid fa-ticket"></i> Token: ${displayOrderId}
                     </div>
                 </div>
 
@@ -243,12 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </table>
 
                 <div class="order-card-footer">
-                    <div class="order-total-price">Total: ₹${order.totalPrice}</div>
+                    <div class="order-total-price">Total: ₹${order.totalPrice || 0}</div>
                     <select class="status-select" data-order-id="${order.orderId}">
-                        <option value="NEW" ${order.status === 'NEW' ? 'selected' : ''}>NEW</option>
-                        <option value="PREPARING" ${order.status === 'PREPARING' ? 'selected' : ''}>PREPARING</option>
-                        <option value="SERVED" ${order.status === 'SERVED' ? 'selected' : ''}>SERVED</option>
-                        <option value="CANCELLED" ${order.status === 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
+                        <option value="NEW" ${orderSt === 'NEW' ? 'selected' : ''}>NEW</option>
+                        <option value="PREPARING" ${orderSt === 'PREPARING' ? 'selected' : ''}>PREPARING</option>
+                        <option value="SERVED" ${orderSt === 'SERVED' ? 'selected' : ''}>SERVED (Delivered)</option>
+                        <option value="CANCELLED" ${orderSt === 'CANCELLED' ? 'selected' : ''}>CANCELLED</option>
                     </select>
                 </div>
             `;
@@ -259,13 +281,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateStatusFilterCounts() {
         const counts = {
-            NEW: orders.filter(o => o.status === 'NEW').length,
-            PREPARING: orders.filter(o => o.status === 'PREPARING').length,
-            SERVED: orders.filter(o => o.status === 'SERVED').length,
+            NEW: orders.filter(o => normalizeStatus(o.status) === 'NEW').length,
+            PREPARING: orders.filter(o => normalizeStatus(o.status) === 'PREPARING').length,
+            SERVED: orders.filter(o => normalizeStatus(o.status) === 'SERVED').length,
         };
 
-        const liveCount = orders.filter(o => o.status === 'NEW' || o.status === 'PREPARING').length;
-        document.getElementById('count-live-orders').textContent = liveCount;
+        const liveCount = orders.filter(o => {
+            const st = normalizeStatus(o.status);
+            return st === 'NEW' || st === 'PREPARING';
+        }).length;
+
+        const countLiveEl = document.getElementById('count-live-orders');
+        if (countLiveEl) countLiveEl.textContent = liveCount;
 
         for (let key in counts) {
             const el = document.getElementById(`status-count-${key.toLowerCase()}`);
