@@ -296,13 +296,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'composta-di-albicocche-speziata': // Kurbani Ka Meetha
                 return `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
-                    <ellipse cx="100" cy="110" rx="60" ry="16" fill="#c4aa82"/>
-                    <ellipse cx="100" cy="85" rx="55" ry="24" fill="#d97523" stroke="#4a2c11" stroke-width="2"/>
-                    <ellipse cx="100" cy="82" rx="46" ry="18" fill="#bf5e11"/>
-                    <!-- Apricot Halves & Mascarpone Cream -->
-                    <circle cx="85" cy="80" r="8" fill="#e68835"/><circle cx="112" cy="82" r="8" fill="#e68835"/>
-                    <ellipse cx="100" cy="78" rx="10" ry="6" fill="#fcfbfa" stroke="#4a2c11" stroke-width="1"/>
+                    <!-- Tablecloth & Plate with Spoons (Left Side) -->
+                    <ellipse cx="38" cy="70" rx="30" ry="42" fill="#d0cfb8" stroke="#a09f88" stroke-width="1.5"/>
+                    <path d="M 20,40 Q 35,55 45,75" fill="none" stroke="#777" stroke-width="3" stroke-linecap="round"/>
+                    <ellipse cx="18" cy="38" rx="6" ry="10" fill="#bbb"/>
+                    
+                    <!-- Glass Coupe Bowl Base & Stem (Center) -->
+                    <ellipse cx="110" cy="120" rx="22" ry="7" fill="rgba(200,200,200,0.5)" stroke="#a0a0a0" stroke-width="1.5"/>
+                    <line x1="110" y1="95" x2="110" y2="120" stroke="#b0b0b0" stroke-width="3.5"/>
+                    <path d="M 75,55 C 75,98 145,98 145,55 Z" fill="rgba(255,255,255,0.3)" stroke="#a0a0a0" stroke-width="2"/>
+                    <ellipse cx="110" cy="55" rx="35" ry="11" fill="rgba(255,255,255,0.4)" stroke="#a0a0a0" stroke-width="1.5"/>
+                    
+                    <!-- Slow-Stewed Apricot Compote (Amber-Red Glaze) -->
+                    <path d="M 77,58 C 77,93 143,93 143,58 Z" fill="#9e3011"/>
+                    <ellipse cx="110" cy="58" rx="33" ry="10" fill="#bd3e17"/>
+                    <ellipse cx="110" cy="57" rx="30" ry="8.5" fill="#d9541e"/>
+                    
+                    <!-- Blanched Apricot Kernel Nuts in Center -->
+                    <ellipse cx="106" cy="57" rx="4" ry="2.5" fill="#fce4b8" transform="rotate(-15 106 57)"/>
+                    <ellipse cx="114" cy="57" rx="4" ry="2.5" fill="#fce4b8" transform="rotate(15 114 57)"/>
                 </svg>`;
+
 
             case 'tartufini-dolci-di-miglio': // Pearl Millet Ladoo (Sajje Ladoo)
                 return `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
@@ -631,11 +645,12 @@ document.addEventListener('DOMContentLoaded', () => {
             indianAlias: 'Kurbani Ka Meetha',
             price: 49,
             diet: 'veg',
-            imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80',
-            description: 'Stewed sweet apricot dessert.',
-            story: 'Traditional Hyderabadi delicacy made from slow-stewed Turkish apricots, flavoured with saffron and cardamom, topped with dollop of Italian mascarpone cream.',
-            ingredients: ['Turkish Dried Apricots', 'Saffron', 'Mascarpone Cream', 'Cardamom', 'Apricot Kernels']
+            imageUrl: 'images/kurbani_meetha.png',
+            description: 'Stewed sweet apricot dessert topped with blanched apricot kernels.',
+            story: 'Royal Hyderabadi delicacy! Slow-stewed Turkish apricots simmered to rich amber-red compote, flavoured with saffron and cardamom, garnished with blanched apricot kernel nuts, served in an elegant stemmed glass coupe bowl.',
+            ingredients: ['Turkish Dried Apricots', 'Saffron', 'Blanched Apricot Kernels', 'Cardamom', 'Pure Cane Sugar']
         },
+
         {
             id: 'tartufini-dolci-di-miglio',
             category: 'desserts',
