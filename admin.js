@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContents = document.querySelectorAll('.tab-content');
     const orderFilterPills = document.querySelectorAll('.order-filter-pill');
 
-    const CLOUD_API_URL = 'https://crudcrud.com/api/0311bb6e949b497eb06aa560bbb7d947/orders';
+    const CLOUD_API_URL = 'https://crudcrud.com/api/b97074328b5e4a699a09005818586bb7/orders';
 
     // --- INITIALIZATION ---
     function init() {
@@ -47,30 +47,32 @@ document.addEventListener('DOMContentLoaded', () => {
     function initMQTTListener() {
         try {
             if (typeof mqtt !== 'undefined') {
-                const mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
-                mqttClient.on('connect', () => {
-                    console.log('Connected to MQTT WebSocket Broker for instant live orders');
-                    mqttClient.subscribe('namma_purple_adda/orders');
-                });
+                ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt'].forEach(url => {
+                    const mqttClient = mqtt.connect(url);
+                    mqttClient.on('connect', () => {
+                        console.log('Connected to MQTT WebSocket Broker for instant live orders:', url);
+                        mqttClient.subscribe('namma_purple_adda/orders');
+                    });
 
-                mqttClient.on('message', (topic, message) => {
-                    try {
-                        const newOrder = JSON.parse(message.toString());
-                        if (newOrder && newOrder.orderId) {
-                            const localIndex = orders.findIndex(o => o.orderId === newOrder.orderId);
-                            if (localIndex === -1) {
-                                orders.unshift(newOrder);
-                                localStorage.setItem('adda_orders', JSON.stringify(orders));
-                                renderAll();
-                                showNewOrderVisualAlert(newOrder);
-                                if (isAudioChimeEnabled) {
-                                    playKitchenChimeSound();
+                    mqttClient.on('message', (topic, message) => {
+                        try {
+                            const newOrder = JSON.parse(message.toString());
+                            if (newOrder && newOrder.orderId) {
+                                const localIndex = orders.findIndex(o => o.orderId === newOrder.orderId);
+                                if (localIndex === -1) {
+                                    orders.unshift(newOrder);
+                                    localStorage.setItem('adda_orders', JSON.stringify(orders));
+                                    renderAll();
+                                    showNewOrderVisualAlert(newOrder);
+                                    if (isAudioChimeEnabled) {
+                                        playKitchenChimeSound();
+                                    }
                                 }
                             }
+                        } catch(e) {
+                            console.log('MQTT message parse error', e);
                         }
-                    } catch(e) {
-                        console.log('MQTT message parse error', e);
-                    }
+                    });
                 });
             }
         } catch (e) {

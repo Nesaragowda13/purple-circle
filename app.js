@@ -1266,21 +1266,23 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Broadcast error', e);
         }
 
-        // Multi-Device Cloud Real-Time Sync via WebSockets (MQTT)
+        // Multi-Device Cloud Real-Time Sync via WebSockets (MQTT Dual Brokers)
         try {
             if (typeof mqtt !== 'undefined') {
-                const mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
-                mqttClient.on('connect', () => {
-                    mqttClient.publish('namma_purple_adda/orders', JSON.stringify(newOrder));
-                    setTimeout(() => mqttClient.end(), 1000);
+                ['wss://broker.hivemq.com:8884/mqtt', 'wss://broker.emqx.io:8084/mqtt'].forEach(url => {
+                    const mqttClient = mqtt.connect(url);
+                    mqttClient.on('connect', () => {
+                        mqttClient.publish('namma_purple_adda/orders', JSON.stringify(newOrder));
+                        setTimeout(() => mqttClient.end(), 1000);
+                    });
                 });
             }
         } catch (e) {
             console.log('MQTT push error', e);
         }
 
-        // REST Backup Relay
-        const CLOUD_API_URL = 'https://crudcrud.com/api/0311bb6e949b497eb06aa560bbb7d947/orders';
+        // REST Backup Relay (Fresh Active Endpoint)
+        const CLOUD_API_URL = 'https://crudcrud.com/api/b97074328b5e4a699a09005818586bb7/orders';
         fetch(CLOUD_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
