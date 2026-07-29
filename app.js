@@ -294,7 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <ellipse cx="160" cy="73" rx="12" ry="5" fill="#7a3e11"/>
                 </svg>`;
 
-            case 'composta-di-albicocche-speziata': // Kurbani Ka Meetha
+            case 'composta-di-albicocche-speziata': // Qurbani Ka Meetha
+
                 return `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg">
                     <!-- Tablecloth & Plate with Spoons (Left Side) -->
                     <ellipse cx="38" cy="70" rx="30" ry="42" fill="#d0cfb8" stroke="#a09f88" stroke-width="1.5"/>
@@ -642,8 +643,9 @@ document.addEventListener('DOMContentLoaded', () => {
             id: 'composta-di-albicocche-speziata',
             category: 'desserts',
             italianName: 'COMPOSTA DI ALBICOCCE SPEZIATA',
-            indianAlias: 'Kurbani Ka Meetha',
+            indianAlias: 'Qurbani Ka Meetha',
             price: 49,
+
             diet: 'veg',
             imageUrl: 'images/kurbani_meetha.png',
             description: 'Stewed sweet apricot dessert topped with blanched apricot kernels.',

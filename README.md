@@ -36,7 +36,8 @@ An interactive, high-aesthetic digital menu poster & real-time kitchen administr
 - **Starters**: Frittelle Di Lenticchie (*Curd Vada*), Bruschetta Al Pomodoro (*Bruschetta*), Sferette Croccanti Speziate (*Panipuri*).
 - **Italian Mains**: Pasta Italiana, Piadina Romagnola (*Italian Flatbread*).
 - **Indian Mains**: Risotto Al Pollo Speziato (*Chicken Biryani*), Riso Freddo Allo Yogurt (*Curd Rice*), Riso Al Mango Agro-Piccante (*Mango Puliyogare*), Crespelle Sottili (*Neer Dosa & Chicken Curry*), Tortino Di Riso (*Puttu & Kadale Curry*), Involtini Dolci (*Neer Dosa Kaibella Roll*).
-- **Desserts**: Composta Di Albicocche (*Kurbani Ka Meetha*), Tartufini Dolci Di Miglio (*Pearl Millet Ladoo*), Indo-Italian Panna Cotta, Budino Dolce Al Cocco (*Coconut Payasa*).
+- **Desserts**: Composta Di Albicocche (*Qurbani Ka Meetha*), Tartufini Dolci Di Miglio (*Pearl Millet Ladoo*), Indo-Italian Panna Cotta, Budino Dolce Al Cocco (*Coconut Payasa*).
+
 - **Beverages**: Na nariCo Tequila Sparkle (*Elaneer Nannari Sarbath*).
 
 ---
