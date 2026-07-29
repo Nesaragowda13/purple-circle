@@ -31,12 +31,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabContents = document.querySelectorAll('.tab-content');
     const orderFilterPills = document.querySelectorAll('.order-filter-pill');
 
+    const CLOUD_SYNC_URL = 'https://api.restful-api.dev/objects/ff8081819f7e10ae019fac4a6aea3fc3';
+
     // --- INITIALIZATION ---
     function init() {
         setupBroadcastChannel();
         renderAll();
         setupEventListeners();
         initQRGenerator();
+        startCloudOrderPolling();
+    }
+
+    // --- CLOUD MULTI-DEVICE REAL-TIME POLLING ---
+    function startCloudOrderPolling() {
+        setInterval(pollCloudOrders, 3000);
+        pollCloudOrders();
+    }
+
+    function pollCloudOrders() {
+        fetch(CLOUD_SYNC_URL)
+            .then(res => res.json())
+            .then(resData => {
+                if (resData && resData.data && Array.isArray(resData.data.orders)) {
+                    const remoteOrders = resData.data.orders;
+                    let hasNewOrders = false;
+
+                    remoteOrders.forEach(remoteOrder => {
+                        const localIndex = orders.findIndex(o => o.orderId === remoteOrder.orderId);
+                        if (localIndex === -1) {
+                            orders.unshift(remoteOrder);
+                            hasNewOrders = true;
+                        } else {
+                            // Update status if remote status changed
+                            if (orders[localIndex].status !== remoteOrder.status) {
+                                orders[localIndex].status = remoteOrder.status;
+                                hasNewOrders = true;
+                            }
+                        }
+                    });
+
+                    if (hasNewOrders) {
+                        localStorage.setItem('adda_orders', JSON.stringify(orders));
+                        renderAll();
+                        if (isAudioChimeEnabled) {
+                            playKitchenChimeSound();
+                        }
+                    }
+                }
+            })
+            .catch(err => console.log('Cloud poll error', err));
+    }
+
+    function syncOrdersToCloud() {
+        fetch(CLOUD_SYNC_URL, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: 'PurpleCircleOrders', data: { orders: orders } })
+        }).catch(err => console.log('Sync to cloud error', err));
     }
 
     // --- REAL-TIME BROADCAST CHANNEL & STORAGE LISTENER ---
@@ -324,6 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         broadcastChannel.postMessage({ type: 'STATUS_UPDATE', orderId, newStatus });
                     }
                     renderAll();
+                    syncOrdersToCloud();
                 }
             }
         });
@@ -353,6 +405,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 orders = [];
                 localStorage.setItem('adda_orders', JSON.stringify(orders));
                 renderAll();
+                syncOrdersToCloud();
             }
         });
 

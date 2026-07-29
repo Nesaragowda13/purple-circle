@@ -1266,6 +1266,23 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Broadcast error', e);
         }
 
+        // Multi-Device Cloud Real-Time Sync
+        const CLOUD_SYNC_URL = 'https://api.restful-api.dev/objects/ff8081819f7e10ae019fac4a6aea3fc3';
+        fetch(CLOUD_SYNC_URL)
+            .then(res => res.json())
+            .then(resData => {
+                let cloudOrders = (resData && resData.data && Array.isArray(resData.data.orders)) ? resData.data.orders : [];
+                if (!cloudOrders.some(o => o.orderId === newOrder.orderId)) {
+                    cloudOrders.push(newOrder);
+                }
+                return fetch(CLOUD_SYNC_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: 'PurpleCircleOrders', data: { orders: cloudOrders } })
+                });
+            })
+            .catch(err => console.log('Cloud sync push error', err));
+
         // Show On-Spot Pickup Confirmation Modal
         modalBody.innerHTML = `
             <div style="text-align: center; padding: 10px 0;">
