@@ -1266,7 +1266,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Broadcast error', e);
         }
 
-        // Multi-Device Cloud Real-Time Sync
+        // Multi-Device Cloud Real-Time Sync via WebSockets (MQTT)
+        try {
+            if (typeof mqtt !== 'undefined') {
+                const mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+                mqttClient.on('connect', () => {
+                    mqttClient.publish('namma_purple_adda/orders', JSON.stringify(newOrder));
+                    setTimeout(() => mqttClient.end(), 1000);
+                });
+            }
+        } catch (e) {
+            console.log('MQTT push error', e);
+        }
+
+        // REST Backup Relay
         const CLOUD_API_URL = 'https://crudcrud.com/api/0311bb6e949b497eb06aa560bbb7d947/orders';
         fetch(CLOUD_API_URL, {
             method: 'POST',

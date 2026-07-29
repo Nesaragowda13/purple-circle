@@ -39,7 +39,43 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAll();
         setupEventListeners();
         initQRGenerator();
+        initMQTTListener();
         startCloudOrderPolling();
+    }
+
+    // --- REAL-TIME WEBSOCKET MQTT LISTENER ---
+    function initMQTTListener() {
+        try {
+            if (typeof mqtt !== 'undefined') {
+                const mqttClient = mqtt.connect('wss://broker.hivemq.com:8884/mqtt');
+                mqttClient.on('connect', () => {
+                    console.log('Connected to MQTT WebSocket Broker for instant live orders');
+                    mqttClient.subscribe('namma_purple_adda/orders');
+                });
+
+                mqttClient.on('message', (topic, message) => {
+                    try {
+                        const newOrder = JSON.parse(message.toString());
+                        if (newOrder && newOrder.orderId) {
+                            const localIndex = orders.findIndex(o => o.orderId === newOrder.orderId);
+                            if (localIndex === -1) {
+                                orders.unshift(newOrder);
+                                localStorage.setItem('adda_orders', JSON.stringify(orders));
+                                renderAll();
+                                showNewOrderVisualAlert(newOrder);
+                                if (isAudioChimeEnabled) {
+                                    playKitchenChimeSound();
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        console.log('MQTT message parse error', e);
+                    }
+                });
+            }
+        } catch (e) {
+            console.log('MQTT init error', e);
+        }
     }
 
     // --- CLOUD MULTI-DEVICE REAL-TIME POLLING ---
