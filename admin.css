@@ -480,3 +480,141 @@ body.royal-admin-theme {
     color: var(--admin-text-muted);
     margin-top: auto;
 }
+
+/* Table QR Code Generator Section */
+.qr-generator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 900px) {
+    .qr-generator-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.qr-control-card, .qr-preview-card {
+    background: var(--admin-card-bg);
+    border: 2px solid var(--admin-border-gold);
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: var(--admin-shadow);
+}
+
+.qr-form-group {
+    margin-bottom: 16px;
+}
+
+.qr-form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--admin-border-gold);
+    margin-bottom: 6px;
+}
+
+.qr-select, .qr-input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--admin-card-alt);
+    border: 1px solid var(--admin-border-gold);
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+}
+
+.qr-select option {
+    background: #1a0817;
+    color: #fff;
+}
+
+.qr-help-text {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--admin-text-muted);
+    margin-top: 4px;
+}
+
+.qr-action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Standee Preview Card */
+.standee-preview-container {
+    background: linear-gradient(145deg, #2d1228, #1a0817);
+    border: 4px double var(--admin-border-gold);
+    border-radius: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.standee-header .standee-prefix {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: var(--admin-border-gold);
+    display: block;
+}
+
+.standee-header .standee-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    color: var(--admin-border-gold);
+    margin: 2px 0;
+}
+
+.standee-header .standee-subtitle {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--admin-text-main);
+    margin-bottom: 16px;
+}
+
+.standee-table-badge {
+    background: var(--admin-border-gold);
+    color: #1a0817;
+    font-weight: 800;
+    font-size: 1.25rem;
+    padding: 6px 18px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.qr-code-box {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+}
+
+.qr-code-box img, .qr-code-box canvas {
+    width: 180px;
+    height: 180px;
+    display: block;
+    margin: 0 auto;
+}
+
+.standee-footer .scan-instruction {
+    font-size: 1.05rem;
+    color: var(--admin-border-gold);
+    margin-bottom: 4px;
+}
+
+.standee-footer .scan-hint {
+    font-size: 0.78rem;
+    color: var(--admin-text-muted);
+}
+

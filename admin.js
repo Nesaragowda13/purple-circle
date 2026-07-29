@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setupBroadcastChannel();
         renderAll();
         setupEventListeners();
+        initQRGenerator();
     }
 
     // --- REAL-TIME BROADCAST CHANNEL & STORAGE LISTENER ---
@@ -162,8 +163,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="status-badge badge-${order.status}">${order.status}</span>
                 </div>
 
-                <div class="order-guest-info">
-                    <i class="fa-solid fa-user"></i> ${order.guestName || 'Potluck Guest'}
+                <div class="order-guest-info" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                    <div><i class="fa-solid fa-user"></i> <strong>${order.guestName || 'Potluck Guest'}</strong></div>
+                    <div style="background: rgba(197, 160, 89, 0.2); border: 1px solid var(--admin-border-gold); padding: 2px 8px; border-radius: 4px; font-weight: 700; color: var(--admin-border-gold); font-size: 0.82rem;">
+                        <i class="fa-solid fa-ticket"></i> Token: ${order.orderId}
+                    </div>
                 </div>
 
                 <table class="order-items-table">
@@ -392,6 +396,196 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.log('Audio chime error:', e);
         }
+    }
+
+    // --- ON-SPOT FOOD ORDERING QR CODE GENERATOR & POSTER PRINTER ---
+    function initQRGenerator() {
+        const qrTableSelect = document.getElementById('qrTableSelect');
+        const customTableInputGroup = document.getElementById('customTableInputGroup');
+        const customTableNameInput = document.getElementById('customTableNameInput');
+        const qrBaseUrlInput = document.getElementById('qrBaseUrlInput');
+        const qrPreapplyPromo = document.getElementById('qrPreapplyPromo');
+        const generatedUrlOutput = document.getElementById('generatedUrlOutput');
+        const qrCodeContainer = document.getElementById('qrCodeContainer');
+        const standeeTableBadge = document.getElementById('standeeTableBadge');
+        
+        const downloadQRBtn = document.getElementById('downloadQRBtn');
+        const printStandeeBtn = document.getElementById('printStandeeBtn');
+        const copyQRLinkBtn = document.getElementById('copyQRLinkBtn');
+
+        if (!qrTableSelect || !qrCodeContainer) return;
+
+        // Set default base url to customer index page
+        let currentUrl = window.location.href.split('#')[0].split('?')[0];
+        let defaultMenuUrl = currentUrl.replace('admin.html', 'index.html');
+        if (!defaultMenuUrl.includes('index.html')) {
+            defaultMenuUrl = defaultMenuUrl.replace(/\/$/, '') + '/index.html';
+        }
+        qrBaseUrlInput.value = defaultMenuUrl;
+
+        function getActiveLocationName() {
+            if (qrTableSelect.value === 'CUSTOM') {
+                return (customTableNameInput.value.trim() || 'On-Spot Food Order');
+            }
+            return qrTableSelect.value;
+        }
+
+        function generateQR() {
+            const locationVal = getActiveLocationName();
+            const baseUrl = qrBaseUrlInput.value.trim() || defaultMenuUrl;
+            const applyPromo = qrPreapplyPromo.checked;
+
+            try {
+                const finalUrl = new URL(baseUrl, window.location.href);
+                finalUrl.searchParams.set('spot', '1');
+                finalUrl.searchParams.set('src', locationVal);
+                if (applyPromo) {
+                    finalUrl.searchParams.set('promo', 'INDOITALIA10');
+                }
+
+                const targetUrlStr = finalUrl.toString();
+                generatedUrlOutput.value = targetUrlStr;
+                standeeTableBadge.textContent = locationVal.toUpperCase();
+
+                // Clear previous QR Code
+                qrCodeContainer.innerHTML = '';
+
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrCodeContainer, {
+                        text: targetUrlStr,
+                        width: 180,
+                        height: 180,
+                        colorDark: "#2d1228",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } else {
+                    renderFallbackCanvasQR(qrCodeContainer, targetUrlStr);
+                }
+            } catch (e) {
+                console.error("QR Code error", e);
+                renderFallbackCanvasQR(qrCodeContainer, baseUrl);
+            }
+        }
+
+        function renderFallbackCanvasQR(container, text) {
+            container.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.width = 180;
+            canvas.height = 180;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 180, 180);
+
+            ctx.fillStyle = '#2d1228';
+            ctx.fillRect(10, 10, 50, 50);
+            ctx.fillRect(120, 10, 50, 50);
+            ctx.fillRect(10, 120, 50, 50);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(20, 20, 30, 30);
+            ctx.fillRect(130, 20, 30, 30);
+            ctx.fillRect(20, 130, 30, 30);
+
+            ctx.fillStyle = '#2d1228';
+            ctx.fillRect(30, 30, 10, 10);
+            ctx.fillRect(140, 30, 10, 10);
+            ctx.fillRect(30, 140, 10, 10);
+
+            ctx.fillStyle = '#2d1228';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('SCAN TO ORDER', 90, 95);
+
+            container.appendChild(canvas);
+        }
+
+        qrTableSelect.addEventListener('change', () => {
+            if (qrTableSelect.value === 'CUSTOM') {
+                customTableInputGroup.style.display = 'block';
+            } else {
+                customTableInputGroup.style.display = 'none';
+            }
+            generateQR();
+        });
+
+        customTableNameInput.addEventListener('input', generateQR);
+        qrBaseUrlInput.addEventListener('input', generateQR);
+        qrPreapplyPromo.addEventListener('change', generateQR);
+
+        downloadQRBtn.addEventListener('click', () => {
+            const locationVal = getActiveLocationName();
+            let qrImg = qrCodeContainer.querySelector('img') || qrCodeContainer.querySelector('canvas');
+            
+            if (!qrImg) return;
+
+            let dataUrl = '';
+            if (qrImg.tagName.toLowerCase() === 'img') {
+                dataUrl = qrImg.src;
+            } else {
+                dataUrl = qrImg.toDataURL('image/png');
+            }
+
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = `IndoItalianAdda_OnSpotQR_${locationVal.replace(/\s+/g, '_')}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        copyQRLinkBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(generatedUrlOutput.value).then(() => {
+                alert('On-Spot Food Order URL copied to clipboard!');
+            });
+        });
+
+        printStandeeBtn.addEventListener('click', () => {
+            const locationVal = getActiveLocationName();
+            const printWin = window.open('', '_blank', 'width=800,height=900');
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>On-Spot Food Order Poster - ${locationVal}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style>
+                        body { margin: 0; padding: 40px; background: #fdfaf5; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+                        .standee-card { width: 380px; border: 4px double #c5a059; background: #2d1228; color: #fff; padding: 36px 28px; text-align: center; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+                        .title { font-family: 'Cinzel', serif; color: #d4af37; font-size: 1.9rem; margin: 0; letter-spacing: 1px; }
+                        .subtitle { color: #f5edd8; font-size: 0.88rem; font-style: italic; margin-top: 4px; margin-bottom: 20px; }
+                        .badge { background: #c5a059; color: #1a0817; font-weight: 800; font-size: 1.1rem; padding: 8px 20px; border-radius: 30px; display: inline-block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1.5px; }
+                        .qr-box { background: #fff; padding: 18px; border-radius: 14px; display: inline-block; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+                        .qr-box img, .qr-box canvas { width: 210px; height: 210px; display: block; margin: 0 auto; }
+                        .instructions { font-weight: 800; font-size: 1.15rem; color: #d4af37; margin: 0 0 6px 0; }
+                        .sub-instructions { font-size: 0.85rem; color: #dedede; line-height: 1.4; }
+                        .step-pill { background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.4); padding: 4px 10px; border-radius: 6px; font-size: 0.78rem; display: inline-block; margin-top: 8px; }
+                        @media print { body { padding: 0; background: none; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="standee-card">
+                        <div style="font-size: 0.75rem; letter-spacing: 2px; color: #c5a059;">NAMMA PURPLE'S</div>
+                        <h1 class="title">INDO-ITALIAN ADDA</h1>
+                        <p class="subtitle">Italian Flair; Indian Alchemy</p>
+                        <div class="badge"><i class="fa-solid fa-qrcode"></i> ${locationVal.toUpperCase()}</div>
+                        <div class="qr-box">${qrCodeContainer.innerHTML}</div>
+                        <p class="instructions"><i class="fa-solid fa-mobile-screen-button"></i> SCAN TO ORDER FOOD ON-SPOT</p>
+                        <p class="sub-instructions">Scan with your smartphone camera → Select dishes & order live → Show your Order Token at the counter for pickup.</p>
+                        <div class="step-pill">✨ Instant Mobile Food Ordering System ✨</div>
+                    </div>
+                    <script>
+                        window.onload = function() { setTimeout(function(){ window.print(); }, 500); };
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        });
+
+        generateQR();
     }
 
     // Start Admin Dashboard

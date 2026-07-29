@@ -16,6 +16,9 @@
     
     <!-- Admin Stylesheet -->
     <link rel="stylesheet" href="admin.css">
+
+    <!-- QRCode JS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="royal-admin-theme">
 
@@ -97,6 +100,9 @@
                 <button class="admin-tab-btn" data-tab="analytics-reports">
                     <i class="fa-solid fa-chart-pie"></i> Potluck Event Report
                 </button>
+                <button class="admin-tab-btn" data-tab="qr-generator">
+                    <i class="fa-solid fa-qrcode"></i> On-Spot QR Code Generator
+                </button>
             </div>
         </section>
 
@@ -163,6 +169,91 @@
                 <div class="report-body" id="reportSummaryContent">
                     <!-- Injected via admin.js -->
                 </div>
+            </div>
+        </section>
+
+        <!-- Tab 4: On-Spot Food Ordering QR Generator & Standee Printing -->
+        <section class="tab-content" id="tab-qr-generator" style="display: none;">
+            <div class="qr-generator-grid">
+
+                <!-- Left Control Panel -->
+                <div class="qr-control-card">
+                    <div class="manager-header">
+                        <h3><i class="fa-solid fa-sliders"></i> On-Spot Food Ordering QR Setup</h3>
+                        <p>Generate QR codes for counter standees, entrance banners, or pickup points.</p>
+                    </div>
+
+                    <div class="qr-form-group">
+                        <label for="qrTableSelect"><i class="fa-solid fa-store"></i> Display Location / Purpose</label>
+                        <select id="qrTableSelect" class="qr-select">
+                            <option value="Food Counter Standee">Food Counter Standee</option>
+                            <option value="Event Entrance Banner">Event Entrance Banner</option>
+                            <option value="Takeaway Pickup Station">Takeaway Pickup Station</option>
+                            <option value="Potluck Buffet Counter">Potluck Buffet Counter</option>
+                            <option value="CUSTOM">-- Custom Location / Title --</option>
+                        </select>
+                    </div>
+
+                    <div class="qr-form-group" id="customTableInputGroup" style="display: none;">
+                        <label for="customTableNameInput"><i class="fa-solid fa-pen"></i> Custom Title / Location Name</label>
+                        <input type="text" id="customTableNameInput" placeholder="e.g. Main Hall Kiosk" class="qr-input">
+                    </div>
+
+                    <div class="qr-form-group">
+                        <label for="qrBaseUrlInput"><i class="fa-solid fa-link"></i> Customer Menu URL</label>
+                        <input type="text" id="qrBaseUrlInput" class="qr-input" placeholder="http://...">
+                        <small class="qr-help-text">Defaults to current customer index.html URL.</small>
+                    </div>
+
+                    <div class="qr-form-group">
+                        <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-dark);">
+                            <input type="checkbox" id="qrPreapplyPromo" checked style="accent-color: var(--accent-purple); width: 16px; height: 16px;">
+                            <span>Pre-apply 10% Early Bird Promo (<code>INDOITALIA10</code>)</span>
+                        </label>
+                    </div>
+
+                    <div class="qr-form-group">
+                        <label for="generatedUrlOutput"><i class="fa-solid fa-qrcode"></i> Target QR Code URL</label>
+                        <input type="text" id="generatedUrlOutput" class="qr-input" readonly style="background: rgba(0,0,0,0.15); color: var(--accent-gold); font-size: 0.82rem;">
+                    </div>
+
+                    <div class="qr-action-buttons">
+                        <button class="btn btn-primary" id="downloadQRBtn">
+                            <i class="fa-solid fa-download"></i> Download QR Image (PNG)
+                        </button>
+                        <button class="btn btn-secondary" id="printStandeeBtn">
+                            <i class="fa-solid fa-print"></i> Print On-Spot Counter Poster
+                        </button>
+                        <button class="btn btn-outline" id="copyQRLinkBtn">
+                            <i class="fa-solid fa-copy"></i> Copy Order Link
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Live Preview Card -->
+                <div class="qr-preview-card">
+                    <div class="standee-preview-container" id="standeePreview">
+                        <div class="standee-header">
+                            <span class="standee-prefix">NAMMA PURPLE'S</span>
+                            <h2 class="standee-title">INDO-ITALIAN ADDA</h2>
+                            <p class="standee-subtitle">Italian Flair; Indian Alchemy</p>
+                        </div>
+
+                        <div class="standee-table-badge" id="standeeTableBadge">
+                            FOOD COUNTER STANDEE
+                        </div>
+
+                        <div class="qr-code-box" id="qrCodeContainer">
+                            <!-- QR code canvas / img injected dynamically -->
+                        </div>
+
+                        <div class="standee-footer">
+                            <p class="scan-instruction"><i class="fa-solid fa-mobile-screen-button"></i> <strong>SCAN TO ORDER FOOD ON-SPOT</strong></p>
+                            <small class="scan-hint">Scan with camera → Place order live → Show Pickup Token at counter</small>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </section>
 

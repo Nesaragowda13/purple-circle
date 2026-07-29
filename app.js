@@ -1166,12 +1166,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Expose menuData for Admin portal
     window.addaMenuData = menuData;
 
+    // --- ON-SPOT FOOD ORDERING & PICKUP TOKEN SYSTEM ---
+    function checkOnSpotQRParam() {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('spot') || urlParams.has('qr') || urlParams.has('src') || urlParams.has('promo')) {
+            const badge = document.getElementById('onspotHeaderBadge');
+            const badgeText = document.getElementById('onspotBadgeText');
+            const locationName = urlParams.get('location') || urlParams.get('src') || 'On-Spot Mobile Order';
+            if (badgeText) badgeText.textContent = locationName;
+            if (badge) badge.style.display = 'inline-flex';
+        }
+
+        if (urlParams.get('promo') === 'INDOITALIA10') {
+            appliedPromo = 'INDOITALIA10';
+            updateCartUI();
+        }
+    }
+
+    // Call check on page load
+    checkOnSpotQRParam();
+
     function exportPotluckOrder() {
         if (cart.length === 0) return;
 
         const guestName = document.getElementById('guestNameInput') ? document.getElementById('guestNameInput').value.trim() : '';
 
-        // Generate Order ID & Timestamp
+        // Generate On-Spot Order Token & Timestamp
         const orderNum = Math.floor(100 + Math.random() * 900);
         const orderId = `#ADDA-${orderNum}`;
         const timestamp = new Date().toISOString();
@@ -1189,6 +1209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const newOrder = {
             orderId: orderId,
             guestName: guestName || 'Potluck Guest',
+            orderType: 'ON_SPOT_PICKUP',
             items: cart.map(i => ({ id: i.id, italianName: i.italianName, indianAlias: i.indianAlias, qty: i.qty, price: i.price })),
             subtotal: subtotal,
             discount: discount,
@@ -1212,33 +1233,33 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Broadcast error', e);
         }
 
-        // Show Confirmation Modal
+        // Show On-Spot Pickup Confirmation Modal
         modalBody.innerHTML = `
             <div style="text-align: center; padding: 10px 0;">
                 <div style="font-size: 3rem; color: #4ade80; margin-bottom: 8px;">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
-                <h2 style="font-family: var(--font-heading-sub); color: var(--accent-purple); font-size: 1.6rem; margin-bottom: 4px;">
-                    Order Placed Successfully!
+                <h2 style="font-family: var(--font-heading-sub); color: var(--accent-purple); font-size: 1.6rem; margin-bottom: 2px;">
+                    On-Spot Order Transmitted!
                 </h2>
-                <div style="font-family: var(--font-heading-sub); font-size: 1.4rem; font-weight: 800; color: var(--accent-terracotta); margin-bottom: 12px;">
-                    Order ID: ${orderId}
-                </div>
+                <p style="font-size: 0.9rem; color: var(--text-dark); margin-bottom: 12px;">Show your Pickup Token at the kitchen counter when called.</p>
 
-                <div class="story-box" style="text-align: left;">
-                    <h4><i class="fa-solid fa-kitchen-set"></i> Kitchen & Admin Status</h4>
-                    <p>Your order has been transmitted live to the kitchen dashboard! Preparation is starting soon.</p>
+                <div style="background: var(--bg-card-alt); border: 2px dashed var(--border-gold); padding: 12px; border-radius: 10px; margin-bottom: 16px;">
+                    <div style="font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; color: var(--accent-purple);">YOUR PICKUP TOKEN</div>
+                    <div style="font-family: var(--font-heading-sub); font-size: 2rem; font-weight: 900; color: var(--accent-terracotta);">
+                        ${orderId}
+                    </div>
                 </div>
 
                 <div style="font-size: 0.95rem; margin-bottom: 16px; text-align: left; background: var(--bg-card-alt); border: 1px solid var(--border-gold); padding: 12px; border-radius: 8px;">
-                    <div><strong>Guest:</strong> ${newOrder.guestName}</div>
-                    <div><strong>Items:</strong> ${cart.length} dish type(s)</div>
-                    <div><strong>Total Amount:</strong> ₹${grandTotal}</div>
+                    <div><strong>👤 Guest:</strong> ${newOrder.guestName}</div>
+                    <div><strong>🍽️ Dishes Ordered:</strong> ${cart.length} item type(s)</div>
+                    <div><strong>💰 Total Payable:</strong> ₹${grandTotal}</div>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
                     <button class="btn btn-primary btn-block" onclick="copyOrderReceipt('${orderId}', ${grandTotal})">
-                        <i class="fa-solid fa-copy"></i> Copy Receipt for WhatsApp
+                        <i class="fa-solid fa-copy"></i> Copy Order Token for Counter
                     </button>
                     <button class="btn btn-secondary btn-block" onclick="document.getElementById('dishModal').style.display='none';">
                         Close
@@ -1249,18 +1270,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         window.copyOrderReceipt = function(id, total) {
             let receipt = `🇮🇹🇮🇳 *NAMMA PURPLE'S INDO-ITALIAN ADDA* 🇮🇳🇮🇹\n`;
-            receipt += `*Order ID: ${id}*\n`;
-            receipt += `Guest: ${guestName || 'Potluck Guest'}\n`;
+            receipt += `🎟️ *ON-SPOT PICKUP TOKEN: ${id}*\n`;
+            receipt += `👤 Guest: ${guestName || 'Potluck Guest'}\n`;
             receipt += `------------------------------------\n`;
             cart.forEach(i => {
                 receipt += `• ${i.italianName} (${i.indianAlias}) x ${i.qty} = ₹${i.price * i.qty}\n`;
             });
             receipt += `------------------------------------\n`;
             receipt += `*Total: ₹${total}*\n`;
-            receipt += `✨ Italian Flair; Indian Alchemy ✨`;
+            receipt += `✨ Show this token at counter for food pickup ✨`;
 
             navigator.clipboard.writeText(receipt).then(() => {
-                alert('Order receipt copied to clipboard!');
+                alert('On-spot order token copied to clipboard!');
             });
         };
 

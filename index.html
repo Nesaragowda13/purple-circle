@@ -18,6 +18,9 @@
     <link rel="stylesheet" href="styles.css?v=3.0">
 
 
+    <!-- QRCode JS CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 </head>
 <body class="parchment-theme">
 
@@ -43,6 +46,9 @@
                 <button class="btn btn-secondary btn-sm" id="toggleAudioBtn" title="Play Vintage Bistro Ambient Sound">
                     <i class="fa-solid fa-music"></i> <span class="btn-text">Bistro Sound: Off</span>
                 </button>
+                <div class="onspot-header-badge" id="onspotHeaderBadge" style="display: none;" title="On-Spot Mobile Order Active">
+                    <i class="fa-solid fa-qrcode"></i> <span id="onspotBadgeText">On-Spot Ordering</span>
+                </div>
             </div>
 
 
@@ -508,7 +514,7 @@
 
             <div class="drawer-footer">
                 <div class="guest-name-row" style="margin-bottom: 8px;">
-                    <input type="text" id="guestNameInput" placeholder="Your Name or Table / Note (e.g. Rahul - Table 4)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-gold); border-radius: 4px; font-size: 0.85rem;">
+                    <input type="text" id="guestNameInput" placeholder="Your Name or Phone # for Counter Callout (e.g. Rahul)" style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-gold); border-radius: 4px; font-size: 0.85rem; background: var(--bg-card); color: var(--text-dark);">
                 </div>
 
                 <div class="promo-input-row">
